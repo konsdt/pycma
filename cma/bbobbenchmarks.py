@@ -405,8 +405,13 @@ class AbstractTestFunction(object):
         """Returns the objective function value (in case noisy).
 
         """
-        return self._evalfull(x)[0]
+        if np.any(self.shift):        
+            return self._evalfull(x + self.shift)[0]
+        else:
+            return self._evalfull(x)[0]
     # TODO: is it better to leave evaluate out and check for hasattr('evaluate') in ExpLogger?
+    
+
 
     def _evalfull(self, x):
         """return noisy and noise-free value, the latter for recording purpose. """
@@ -438,7 +443,7 @@ class BBOBFunction(AbstractTestFunction):
     of BBOB such as initialisations of class attributes.
 
     """
-    def __init__(self, iinstance=0, zerox=False, zerof=False, param=None, **kwargs):
+    def __init__(self, iinstance=0, zerox=False, zerof=False, param=None, shift=None, **kwargs):
         """Common initialisation.
 
         Keyword arguments:
@@ -472,6 +477,7 @@ class BBOBFunction(AbstractTestFunction):
         self.dim = None
         self.lastshape = None
         self.param = param
+        self.shift = shift
         for i, v in kwargs.items():
             setattr(self, i, v)
         self._xopt = None
