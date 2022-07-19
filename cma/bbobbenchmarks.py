@@ -189,6 +189,41 @@ from numpy.random import random as _rand # TODO: may bring confusion
 
 ### FUNCTION DEFINITION ###
 
+
+
+### Added by KD ###
+
+def FunctionPair(funId0, funId1, iinstance, dimension):
+    """
+    Calculate shift, that is necessary to shift the optimum location
+    of f1 to the optimum location of f0.
+    Return the first fun
+    """
+
+    initarray = dimension * [0.]
+    #get two base function objects
+    f0 = instantiate(funId0, iinstance=iinstance)[0]
+    f1 = instantiate(funId1, iinstance=iinstance)[0]
+    #this is necessery to initialize the functions dimension
+    f0(initarray)
+    f1(initarray)
+    # calculate vector between optima locations
+    shift = f1.xopt - f0.xopt
+    # test
+    if f1.fopt == f1(f0.xopt + shift):
+        pass
+    else:
+        return print("Error: Function corrupt! - Shift calculation fails.")
+    
+    #initialize shifted function object f1
+    f1_shifted = instantiate(funId1, iinstance=iinstance, shift=shift)[0]
+    #set xopt parameter of shifted function to correct value for completeness
+    f1_shifted.xopt = f0.xopt
+
+    # return function pair
+    return f0, f1_shifted
+
+### ADDED BY KD ###
 def compute_xopt(rseed, dim):
     """Generate a random vector used as optimum argument.
 
@@ -2154,6 +2189,27 @@ class _FTemplate(BBOBNfreeFunction):
         ftrue += fadd
         fval += fadd
         return fval, ftrue
+
+
+### ADDED BY KD ###
+
+class ACOBEFU:
+    """
+    Instantiate a mixture of 2 BBOB functions.
+    
+    alpha * f1 + (1 - alpha) * f0
+
+    """
+    def __init__(self, funId0, funId1, dimension, iinstance, alpha):
+
+        self.alpha = alpha
+        self.f0, self.f1 = FunctionPair(funId0=funId0, funId1=funId1, 
+                                        iinstance=iinstance, dimension=dimension)
+    def __call__(self, X):
+        return self.alpha * self.f1(X) + (1 - self.alpha) * self.f0(X)
+
+### ADDED BY KD ###
+
 
 def instantiate(ifun, iinstance=0, param=None, **kwargs):
     """Returns test function ifun, by default instance 0,
