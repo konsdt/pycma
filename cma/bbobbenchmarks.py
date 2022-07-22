@@ -2203,8 +2203,13 @@ class ACOBEFU:
     def __init__(self, funId0, funId1, dimension, iinstance, alpha):
 
         self.alpha = alpha
+        self.f0_name = nfreeinfos[funId0 - 1]
+        self.f1_name = nfreeinfos[funId1 - 1]
         self.f0, self.f1 = FunctionPair(funId0=funId0, funId1=funId1, 
                                         iinstance=iinstance, dimension=dimension)
+        self.xopt = self.f0.xopt
+        self.fopt = alpha * self.f1.fopt + (1 - alpha) * self.f0.fopt
+
     def __call__(self, X):
         return self.alpha * self.f1(X) + (1 - self.alpha) * self.f0(X)
 
